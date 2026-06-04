@@ -13,7 +13,9 @@ Facture.init(
     commandeId: { type: DataTypes.INTEGER, allowNull: true, field: 'commande_id' },
     dateEmission: { type: DataTypes.DATE, allowNull: true, field: 'date_emission' },
     statut: { type: DataTypes.TEXT, defaultValue: 'en_attente' },
-    userId: { type: DataTypes.INTEGER, allowNull: true, field: 'user_id' },
+    commandeRef: { type: DataTypes.TEXT, allowNull: true, field: 'commande_ref' },
+    // user_id = ID Better Auth (texte). Voir avoir.model.ts pour la raison.
+    userId: { type: DataTypes.TEXT, allowNull: true, field: 'user_id' },
     paiementId: { type: DataTypes.INTEGER, allowNull: true, field: 'paiement_id' },
   },
   {
