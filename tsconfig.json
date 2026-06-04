@@ -18,6 +18,11 @@
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules",
+    "src/app.ts",
+    "src/db/index.ts",
+    "src/db/config.ts"
+  ],
   "include": ["**/src/**/*"]
 }

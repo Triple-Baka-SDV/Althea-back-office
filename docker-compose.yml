@@ -1,0 +1,47 @@
+services:
+  back-office:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "${ADMIN_PORT:-3002}:3001"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      # ADMIN_PORT côté conteneur = 3001 (port d'écoute interne d'Express),
+      # le mapping ci-dessus expose ce 3001 sur ADMIN_PORT côté hôte.
+      - ADMIN_PORT=3001
+      - DATABASE_URL=${DATABASE_URL:-postgresql://athlea_user:securepassword@postgres:5432/athlea_db}
+      - DB_SSL=${DB_SSL:-false}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@althea.local}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin1234}
+      - SESSION_SECRET=${SESSION_SECRET:-change-me-to-a-long-random-string-for-prod}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL:-http://auth-service:3001}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio}
+      - MINIO_PORT=${MINIO_PORT:-9000}
+      - MINIO_USE_SSL=${MINIO_USE_SSL:-false}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_BUCKET=${MINIO_BUCKET:-althea-images}
+      - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
+    networks:
+      - medical-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/admin/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Le back-office se branche sur le réseau créé par Althea-API/docker-compose.yml
+# (postgres, auth-service, minio y vivent déjà sous ces noms d'hôte). Il faut
+# donc démarrer la stack API en premier : `docker compose up` dans Althea-API/
+# puis `docker compose up` ici.
+networks:
+  medical-network:
+    name: medical-network
+    external: true
