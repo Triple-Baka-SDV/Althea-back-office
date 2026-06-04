@@ -74,7 +74,7 @@ const Dashboard = () => {
     'Administrateur';
 
   return (
-    <div style={{ padding: '48px 48px', maxWidth: 1080, margin: '0 auto' }}>
+    <div style={{ padding: '48px 48px', maxWidth: 1080 }}>
       <Text fontSize="sm" color="grey60" style={{ letterSpacing: 0.5 }}>
         Althea Systems — Back Office
       </Text>
