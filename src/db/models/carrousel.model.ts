@@ -24,7 +24,7 @@ CarrouselItem.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     carrouselId: { type: DataTypes.INTEGER, allowNull: true, field: 'carrousel_id' },
-    imageId: { type: DataTypes.TEXT, allowNull: false, field: 'image_url' },
+    imageId: { type: DataTypes.TEXT, allowNull: false, defaultValue: '', field: 'image_url' },
     title: { type: DataTypes.TEXT, allowNull: true },
     subtitle: { type: DataTypes.TEXT, allowNull: true },
     order: { type: DataTypes.INTEGER, defaultValue: 0 },

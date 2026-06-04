@@ -67,6 +67,7 @@ export const admin = new AdminJS({
       resource: Product,
       options: {
         navigation: { name: 'Catalogue', icon: 'Box' },
+        titleProperty: 'names',
         listProperties: ['id', 'names', 'unitaryPrice', 'active', 'categoryId', 'taxeId', 'lastUpdate'],
         filterProperties: ['active', 'categoryId', 'taxeId', 'names'],
         showProperties: [
@@ -97,7 +98,6 @@ export const admin = new AdminJS({
           'typeId',
           'stockId',
           'taxeId',
-          'linkPix',
         ],
         actions: {
           delete: {
@@ -127,8 +127,11 @@ export const admin = new AdminJS({
         properties: {
           linkPix: {
             description:
-              'URL publique de l\'image. Cliquez sur « Téléverser une image » dans les actions du produit pour ouvrir le gestionnaire.',
+              'URL publique de l\'image. Définie via l\'action « Téléverser une image » (le champ n\'apparaît pas dans le formulaire de création/édition — créez d\'abord le produit puis utilisez l\'action pour ajouter l\'image).',
           },
+          categoryId: { reference: 'categories' },
+          stockId: { reference: 'stocks' },
+          taxeId: { reference: 'taxes' },
         },
       },
     },
@@ -138,6 +141,7 @@ export const admin = new AdminJS({
       resource: Category,
       options: {
         navigation: { name: 'Catalogue', icon: 'Tag' },
+        titleProperty: 'nom',
         listProperties: ['id', 'nom', 'icones'],
         editProperties: ['nom', 'icones'],
       },
@@ -148,6 +152,7 @@ export const admin = new AdminJS({
       resource: Stock,
       options: {
         navigation: { name: 'Catalogue', icon: 'Package' },
+        titleProperty: 'productName',
         listProperties: ['id', 'productName', 'quantity', 'accountingPrice'],
         filterProperties: ['productName', 'quantity'],
         editProperties: ['productName', 'quantity', 'accountingPrice'],
@@ -162,6 +167,7 @@ export const admin = new AdminJS({
       resource: Tax,
       options: {
         navigation: { name: 'Catalogue', icon: 'Percent' },
+        titleProperty: 'nom',
         listProperties: ['id', 'nom', 'taux'],
         editProperties: ['nom', 'taux'],
       },
@@ -172,6 +178,7 @@ export const admin = new AdminJS({
       resource: Order,
       options: {
         navigation: { name: 'Commandes', icon: 'Receipt' },
+        titleProperty: 'productName',
         listProperties: ['id', 'productName', 'clientId', 'quantity', 'unitaryPrice', 'status', 'createdAt'],
         filterProperties: ['status', 'clientId', 'productsId'],
         showProperties: [
@@ -202,6 +209,7 @@ export const admin = new AdminJS({
               { value: 'remboursee', label: '🟣 Remboursée' },
             ],
           },
+          productsId: { reference: 'products' },
         },
       },
     },
@@ -238,6 +246,7 @@ export const admin = new AdminJS({
               { value: 'remboursee', label: 'Remboursée' },
             ],
           },
+          commandeId: { reference: 'orders' },
         },
       },
     },
@@ -286,6 +295,7 @@ export const admin = new AdminJS({
       resource: Carrousel,
       options: {
         navigation: { name: 'Contenus', icon: 'Photo' },
+        titleProperty: 'name',
         listProperties: ['id', 'name', 'active', 'createdAt'],
         editProperties: ['name', 'active'],
         actions: {
@@ -301,7 +311,7 @@ export const admin = new AdminJS({
       options: {
         navigation: { name: 'Contenus', icon: 'Photo' },
         listProperties: ['id', 'carrouselId', 'title', 'subtitle', 'order'],
-        editProperties: ['carrouselId', 'imageId', 'title', 'subtitle', 'order'],
+        editProperties: ['carrouselId', 'title', 'subtitle', 'order'],
         actions: {
           delete: {
             guard: 'Confirmer la suppression de cet élément ?',
@@ -326,8 +336,9 @@ export const admin = new AdminJS({
         properties: {
           imageId: {
             description:
-              'URL publique de l\'image (colonne image_url). Cliquez sur « Téléverser une image » dans les actions de la diapositive pour ouvrir le gestionnaire.',
+              'URL publique de l\'image (colonne image_url). Définie via l\'action « Téléverser une image » (le champ n\'apparaît pas dans le formulaire de création/édition — créez d\'abord la diapositive puis utilisez l\'action pour ajouter l\'image).',
           },
+          carrouselId: { reference: 'carrousel' },
         },
       },
     },
