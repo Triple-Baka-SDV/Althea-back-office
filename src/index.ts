@@ -5,10 +5,11 @@ import AdminJSExpress from '@adminjs/express';
 
 import { sequelize } from './db/connection.js';
 import { admin } from './admin/index.js';
+import { uploadRoutes } from './upload-routes.js';
 
 const app = express();
 const PORT = Number(process.env.ADMIN_PORT ?? 3001);
-const SECRET = process.env.SESSION_SECRET!;
+const SECRET = process.env.SESSION_SECRET ?? 'change-me';
 const COOKIE_NAME = 'adminjs-session';
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL ?? 'http://localhost:3001';
 
@@ -62,7 +63,7 @@ app.get('/admin/sso', async (req, res) => {
       return fail(403, 'Accès refusé : compte non administrateur.');
     }
 
-    (req.session as any).adminUser = {
+    req.session.adminUser = {
       email: user.email,
       role: user.role,
       id: user.id,
@@ -76,7 +77,7 @@ app.get('/admin/sso', async (req, res) => {
     });
   } catch (err) {
     console.error('[SSO]', err);
-    fail(500, "Erreur d'authentification.");
+    fail(500, 'Erreur d\'authentification.');
   }
 });
 
@@ -97,6 +98,7 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   null,
   {
     store: sessionStore,
+    secret: SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: cookieOpts,
@@ -104,6 +106,7 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
 );
 
 app.use(admin.options.rootPath, adminRouter);
+app.use('/uploads', uploadRoutes);
 
 const start = async () => {
   try {
@@ -117,6 +120,7 @@ const start = async () => {
     app.listen(PORT, () => {
       console.log(`Back office disponible sur http://localhost:${PORT}/admin`);
       console.log(`SSO endpoint : http://localhost:${PORT}/admin/sso?token=...`);
+      console.log(`Gestionnaire d'images : http://localhost:${PORT}/uploads`);
     });
   } catch (err) {
     console.error('Erreur au démarrage :', err);

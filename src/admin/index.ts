@@ -1,3 +1,6 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 import AdminJS from 'adminjs';
 import AdminJSSequelize from '@adminjs/sequelize';
 import { ComponentLoader } from 'adminjs';
@@ -18,7 +21,17 @@ import {
 
 AdminJS.registerAdapter(AdminJSSequelize);
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const componentLoader = new ComponentLoader();
+// Composant React minimal qui redirige vers /uploads. C'est la seule
+// façon raisonnable d'avoir une entrée de sidebar AdminJS qui ouvre une
+// route Express externe — un `pages` AdminJS doit obligatoirement avoir
+// un composant pour s'afficher dans la nav.
+const RedirectToUploads = componentLoader.add(
+  'RedirectToUploads',
+  path.join(__dirname, 'components/RedirectToUploads'),
+);
 
 // ======================
 // ADMIN CONFIG
@@ -91,6 +104,31 @@ export const admin = new AdminJS({
             // Demande de confirmation avant suppression
             guard: 'Confirmer la suppression de ce produit ?',
           },
+          // Bouton "Téléverser l'image" sur chaque produit — redirige vers
+          // le gestionnaire d'images Express (en dehors d'AdminJS) qui gère le
+          // multipart + MinIO. AdminJS ne gère pas le file upload nativement
+          // sans composant React custom, donc on délègue.
+          uploadImage: {
+            actionType: 'record',
+            icon: 'Upload',
+            label: 'Téléverser une image',
+            guard: 'Vous allez être redirigé vers le gestionnaire d\'images.',
+            component: false,
+            handler: async (_request, _response, context) => {
+              const id = context.record?.params.id;
+              return {
+                record: context.record?.toJSON(context.currentAdmin),
+                redirectUrl: id ? `/uploads?focus=product:${id}` : '/uploads',
+                notice: { message: 'Ouverture du gestionnaire d\'images', type: 'success' },
+              };
+            },
+          },
+        },
+        properties: {
+          linkPix: {
+            description:
+              'URL publique de l\'image. Cliquez sur « Téléverser une image » dans les actions du produit pour ouvrir le gestionnaire.',
+          },
         },
       },
     },
@@ -161,6 +199,7 @@ export const admin = new AdminJS({
               { value: 'en_cours', label: '🔵 En cours' },
               { value: 'terminee', label: '🟢 Terminée' },
               { value: 'annulee', label: '🔴 Annulée' },
+              { value: 'remboursee', label: '🟣 Remboursée' },
             ],
           },
         },
@@ -196,6 +235,7 @@ export const admin = new AdminJS({
               { value: 'en_attente', label: 'En attente' },
               { value: 'payee', label: 'Payée' },
               { value: 'annulee', label: 'Annulée' },
+              { value: 'remboursee', label: 'Remboursée' },
             ],
           },
         },
@@ -266,13 +306,42 @@ export const admin = new AdminJS({
           delete: {
             guard: 'Confirmer la suppression de cet élément ?',
           },
+          // Même pattern que pour Product — bouton qui pointe vers /uploads.
+          uploadImage: {
+            actionType: 'record',
+            icon: 'Upload',
+            label: 'Téléverser une image',
+            guard: 'Vous allez être redirigé vers le gestionnaire d\'images.',
+            component: false,
+            handler: async (_request, _response, context) => {
+              const id = context.record?.params.id;
+              return {
+                record: context.record?.toJSON(context.currentAdmin),
+                redirectUrl: id ? `/uploads?focus=carrousel:${id}` : '/uploads',
+                notice: { message: 'Ouverture du gestionnaire d\'images', type: 'success' },
+              };
+            },
+          },
+        },
+        properties: {
+          imageId: {
+            description:
+              'URL publique de l\'image (colonne image_url). Cliquez sur « Téléverser une image » dans les actions de la diapositive pour ouvrir le gestionnaire.',
+          },
         },
       },
     },
   ],
 
+  pages: {
+    'Gestionnaire d\'images': {
+      icon: 'Upload',
+      component: RedirectToUploads,
+    },
+  },
+
   branding: {
-    companyName: 'Althéa Systems — Back Office',
+    companyName: 'Althea Systems — Back Office',
     logo: false,
     favicon: '',
   },
