@@ -7,7 +7,6 @@ import { ComponentLoader } from 'adminjs';
 import { Op } from 'sequelize';
 
 import {
-  User,
   Product,
   Category,
   Stock,
@@ -53,7 +52,6 @@ const dashboardHandler = async () => {
       factures,
       facturesUnpaid,
       avoirsPending,
-      users,
       categories,
     ] = await Promise.all([
       Product.count(),
@@ -63,7 +61,6 @@ const dashboardHandler = async () => {
       Facture.count(),
       Facture.count({ where: { statut: 'en_attente' } }),
       Avoir.count({ where: { statut: 'en_cours_de_remboursement' } }),
-      User.count(),
       Category.count(),
     ]);
     return {
@@ -74,7 +71,6 @@ const dashboardHandler = async () => {
       factures,
       facturesUnpaid,
       avoirsPending,
-      users,
       categories,
     };
   } catch (err) {
@@ -96,27 +92,6 @@ export const admin = new AdminJS({
   },
 
   resources: [
-    // ── UTILISATEURS ──────────────────────────────
-    {
-      resource: User,
-      options: {
-        navigation: { name: 'Utilisateurs', icon: 'User' },
-        listProperties: ['id', 'username', 'mail', 'role', 'firstName', 'lastName', 'createdAt'],
-        filterProperties: ['role', 'mail', 'username'],
-        showProperties: ['id', 'username', 'mail', 'role', 'firstName', 'lastName', 'phoneNumber', 'createdAt'],
-        editProperties: ['username', 'mail', 'role', 'firstName', 'lastName', 'phoneNumber'],
-        actions: {
-          new: { isAccessible: false },
-          delete: { isAccessible: false },
-        },
-        properties: {
-          // Le mot de passe est dans la table accounts, on le cache partout
-          password: {
-            isVisible: { list: false, show: false, edit: false, filter: false },
-          },
-        },
-      },
-    },
 
     // ── PRODUITS ──────────────────────────────────
     {
