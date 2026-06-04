@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import AdminJS from 'adminjs';
 import AdminJSSequelize from '@adminjs/sequelize';
 import { ComponentLoader } from 'adminjs';
+import { Op } from 'sequelize';
 
 import {
   User,
@@ -33,11 +34,66 @@ const RedirectToUploads = componentLoader.add(
   path.join(__dirname, 'components/RedirectToUploads'),
 );
 
+// Landing page personnalisée affichée à l'ouverture de /admin.
+const Dashboard = componentLoader.add(
+  'Dashboard',
+  path.join(__dirname, 'components/Dashboard'),
+);
+
+// Handler côté serveur — exécute les counts en parallèle et renvoie le tout
+// au composant React via ApiClient.getDashboard(). Les valeurs nulles côté
+// front s'affichent en "—" si une requête échoue.
+const dashboardHandler = async () => {
+  try {
+    const [
+      products,
+      productsActive,
+      orders,
+      ordersPending,
+      factures,
+      facturesUnpaid,
+      avoirsPending,
+      users,
+      categories,
+    ] = await Promise.all([
+      Product.count(),
+      Product.count({ where: { active: true } }),
+      Order.count(),
+      Order.count({ where: { status: { [Op.in]: ['en_attente', 'en_cours'] } } }),
+      Facture.count(),
+      Facture.count({ where: { statut: 'en_attente' } }),
+      Avoir.count({ where: { statut: 'en_cours_de_remboursement' } }),
+      User.count(),
+      Category.count(),
+    ]);
+    return {
+      products,
+      productsActive,
+      orders,
+      ordersPending,
+      factures,
+      facturesUnpaid,
+      avoirsPending,
+      users,
+      categories,
+    };
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[dashboard] count query failed:', err);
+    return {};
+  }
+};
+
 // ======================
 // ADMIN CONFIG
 // ======================
 export const admin = new AdminJS({
   componentLoader,
+
+  dashboard: {
+    component: Dashboard,
+    handler: dashboardHandler,
+  },
 
   resources: [
     // ── UTILISATEURS ──────────────────────────────
